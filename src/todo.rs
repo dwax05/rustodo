@@ -41,13 +41,21 @@ impl TodoList {
         }
     }
 
-    pub fn write_to_file(&self) {
+    pub fn get_todos(&self) -> Vec<String> {
+        let mut todos: Vec<String> = Vec::new();
+        for todo in &self.todos { 
+            let todo = Todo::new(String::from(todo.task.as_str()));
+            todos.push(todo.task);
+        }
+        todos
+    }
 
+    pub fn write_to_file(&self) {
         let mut buffer = BufWriter::new(File::create("TODO.txt").expect("Could not create file"));
 
         for todo in &self.todos {
             let completed: String = if todo.completed == true { String::from("DONE ") }else{ String::from("TODO ") };
-            let line: String = completed  + todo.task.clone().as_ref();
+            let line: String = completed + todo.task.as_str();
 
             write!(buffer, "{}\n", line).expect("Could not write to file");
         }
@@ -71,8 +79,8 @@ impl TodoList {
         self.todos.remove(index);
     }
 
-    pub fn read_todos_from_file(&mut self, file: String){
-        let file = File::open(file).expect("Could not read file");
+    pub fn read_todos_from_file(&mut self){
+        let file = File::open("TODO.txt").expect("Could not read file");
 
         // Create a BufReader to read lines from the file
         let reader = BufReader::new(file);
@@ -83,8 +91,7 @@ impl TodoList {
             match line {
                 Ok(line_content) => {
                     // Do something with the line content
-                    let line_content_as_str = line_content.as_str();
-                    let (status, task) = line_content_as_str.split_at(5);
+                    let (status, task) = line_content.as_str().split_at(5);
                     let mut todo: Todo = Todo::new(String::from(task));
                     if status == "DONE " {
                         todo.complete();

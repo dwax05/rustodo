@@ -1,5 +1,5 @@
-TODO test
-TODO exam
-DONE example
-TODO homework
-TODO apcsa
+test
+exam
+example
+homework
+apcsa
