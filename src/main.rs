@@ -1,7 +1,7 @@
 use ncurses::*;
 use std::{
     io::Write,
-    fs::{File, self},
+    fs::{File, self}, ops::Index,
 };
 
 const REGULAR_PAIR: i16 = 0;
@@ -155,36 +155,43 @@ fn main() -> std::io::Result<()>{
                 Tab::Todo => list_down(&todos, &mut todo_curr),
                 Tab::Done => list_down(&dones, &mut done_curr),
             },
-            'n' => {
-                let mut done = false;
-                let mut word: String = String::new();
-                while !done {
-                    let key = getch();
-                    match key as u8 as char {
-                        '\n' => done = true,
-                        _ => word.push(key as u8 as char),
-                    }
-                }
-                todos.push(format!("{}", word));
-            },
             'd' => match tab {
                 Tab::Todo => {
-                    todos.remove(todo_curr);
+                    if todos.len() != 0 {
+                        todos.remove(todo_curr);
+                    }
                 },
                 Tab::Done => {
-                    dones.remove(done_curr);
+                    if dones.len() != 0 {
+                        dones.remove(done_curr);
+                    }
                 },
-            }
+            },
+            'n' => {
+                match tab {
+                    Tab::Done => {},
+                    Tab::Todo => {
+                        let mut new_todo = String::new();
+                        let mut exit = false;
+                        while !exit {
+                            let key = getch() as u8 as char;
+                            match key {
+                                '\n' => exit = true,
+                                _ => new_todo.push(key),
+                            }
+                        }
+                        todos.push(new_todo);
+                    },
+                }
+            },
             '\n' => match tab {
                 Tab::Todo => list_transfer(&mut dones, &mut todos, &mut todo_curr),
                 Tab::Done => list_transfer(&mut todos, &mut dones, &mut done_curr),
             },
             '\t' => {
                 tab = tab.toggle();
-            }
-            _ => {
-                // todos.push(format!("{}", key));
-            }
+            },
+            _ => {}
         }
     }
 
